@@ -48,6 +48,14 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Springdoc OpenAPI (Swagger UI) for Spring Boot 3.x -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+
+
         <!-- Spring Boot Starter Test for unit testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
