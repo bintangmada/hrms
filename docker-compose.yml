@@ -1,0 +1,46 @@
+version: '3.8'
+
+# ==============================================================================
+# DOCKER COMPOSE CONFIGURATION FOR HRMS SERVICES
+# ==============================================================================
+# File ini menyatukan dan mengorkestrasi seluruh layanan (services) HRMS.
+# Karena database PostgreSQL berjalan langsung di OS VPS (bare metal),
+# maka di sini kita hanya mendefinisikan kontainer untuk Backend (dan nanti Frontend).
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # SERVICE: BACKEND (Spring Boot Java Application)
+  # ----------------------------------------------------------------------------
+  backend:
+    # Mengunduh image hasil compile dari GitHub Container Registry (GHCR)
+    # Catatan: ${GITHUB_REPOSITORY_OWNER} akan diisi otomatis jika diset, 
+    # atau Anda bisa menggantinya langsung dengan username GitHub Anda (misal: bintangmada)
+    image: ghcr.io/bintangmada/hrms-backend:latest
+    container_name: hrms-backend
+    restart: always
+    
+    # Memetakan port kontainer (8020) ke port lokal VPS (8020) agar bisa diakses Nginx OS
+    ports:
+      - "8020:8020"
+      
+    # Mengirimkan environment variables dari OS VPS ke dalam kontainer
+    environment:
+      # Koneksi Database menunjuk ke IP Gateway internal Docker (172.17.0.1) 
+      # yang tersambung ke database PostgreSQL di OS VPS luar Docker.
+      - DB_HOST=172.17.0.1
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      
+      # Konfigurasi JPA Hibernate
+      - JPA_DDL_AUTO=update
+      - JPA_SHOW_SQL=true
+      
+      # OPTIMASI MEMORI JVM (Sangat penting agar hemat RAM di VPS 4GB)
+      - JAVA_OPTS=-Xms64m -Xmx256m -XX:+UseSerialGC -XX:MaxMetaspaceSize=80m
+
+    # Pengaturan agar kontainer bisa mengenali host luar menggunakan nama domain 'host.docker.internal'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
