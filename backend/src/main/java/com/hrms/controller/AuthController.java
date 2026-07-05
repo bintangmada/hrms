@@ -1,5 +1,6 @@
 package com.hrms.controller;
 
+import com.hrms.dto.ApiResponse;
 import com.hrms.dto.AuthResponse;
 import com.hrms.dto.LoginRequest;
 import com.hrms.dto.RegisterRequest;
@@ -30,16 +31,16 @@ public class AuthController {
     // ENDPOINT: POST http://localhost:8020/api/v1/auth/register
     @Operation(summary = "Register a new user account")
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterRequest request) {
         String result = authService.registerUser(request);
-        return new ResponseEntity<>(result, HttpStatus.CREATED);
+        return new ResponseEntity<>(ApiResponse.success(result), HttpStatus.CREATED);
     }
 
     // ENDPOINT: POST http://localhost:8020/api/v1/auth/login
     @Operation(summary = "Login to obtain JWT token")
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.loginUser(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Login successful", response));
     }
 }

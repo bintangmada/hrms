@@ -1,5 +1,6 @@
 package com.hrms.controller;
 
+import com.hrms.dto.ApiResponse;
 import com.hrms.dto.RoleRequest;
 import com.hrms.dto.RoleResponse;
 import com.hrms.service.RoleService;
@@ -40,40 +41,40 @@ public class RoleController {
     // ENDPOINT: GET http://localhost:8020/api/v1/roles
     @Operation(summary = "Get list of all active roles")
     @GetMapping
-    public ResponseEntity<List<RoleResponse>> getAllRoles() {
+    public ResponseEntity<ApiResponse<List<RoleResponse>>> getAllRoles() {
         List<RoleResponse> response = roleService.getAllActiveRoles();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Roles retrieved successfully", response));
     }
 
     // ENDPOINT: GET http://localhost:8020/api/v1/roles/{id}
     @Operation(summary = "Get active role details by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<RoleResponse> getRoleById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<RoleResponse>> getRoleById(@PathVariable Long id) {
         RoleResponse response = roleService.getRoleById(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Role details retrieved successfully", response));
     }
 
     // ENDPOINT: POST http://localhost:8020/api/v1/roles
     @Operation(summary = "Create a new role")
     @PostMapping
-    public ResponseEntity<RoleResponse> createRole(@Valid @RequestBody RoleRequest request) {
+    public ResponseEntity<ApiResponse<RoleResponse>> createRole(@Valid @RequestBody RoleRequest request) {
         RoleResponse response = roleService.createRole(request, getCurrentUsername());
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(ApiResponse.success("Role created successfully", response), HttpStatus.CREATED);
     }
 
     // ENDPOINT: POST http://localhost:8020/api/v1/roles/{id}/update
     @Operation(summary = "Update an existing role")
     @PostMapping("/{id}/update")
-    public ResponseEntity<RoleResponse> updateRole(@PathVariable Long id, @Valid @RequestBody RoleRequest request) {
+    public ResponseEntity<ApiResponse<RoleResponse>> updateRole(@PathVariable Long id, @Valid @RequestBody RoleRequest request) {
         RoleResponse response = roleService.updateRole(id, request, getCurrentUsername());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Role updated successfully", response));
     }
 
     // ENDPOINT: POST http://localhost:8020/api/v1/roles/{id}/delete
     @Operation(summary = "Soft-delete an existing role")
     @PostMapping("/{id}/delete")
-    public ResponseEntity<String> deleteRole(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<String>> deleteRole(@PathVariable Long id) {
         String result = roleService.deleteRole(id, getCurrentUsername());
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }
