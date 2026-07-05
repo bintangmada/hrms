@@ -11,6 +11,7 @@ import com.hrms.repository.UserRoleRepository;
 import com.hrms.repository.UserRepository;
 import com.hrms.security.JwtUtils;
 import com.hrms.service.AuthService;
+import com.hrms.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public String registerUser(RegisterRequest request) {
+        // Enforce validation to prevent blank values or placeholder 'string'
+        ValidationUtils.validateNotPlaceholder(request.getUsername(), "Username");
+        ValidationUtils.validateNotPlaceholder(request.getEmail(), "Email");
+        ValidationUtils.validateNotPlaceholder(request.getPassword(), "Password");
+
         // 1. Verify username uniqueness
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username is already taken!");
@@ -99,6 +105,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public AuthResponse loginUser(LoginRequest request) {
+        // Enforce validation to prevent blank values or placeholder 'string'
+        ValidationUtils.validateNotPlaceholder(request.getUsernameOrEmail(), "Username or Email");
+        ValidationUtils.validateNotPlaceholder(request.getPassword(), "Password");
+
         // 1. Find user by username or email
         User user = userRepository.findByUsername(request.getUsernameOrEmail())
                 .or(() -> userRepository.findByEmail(request.getUsernameOrEmail()))
@@ -137,6 +147,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public String registerStaffUser(RegisterRequest request) {
+        // Enforce validation to prevent blank values or placeholder 'string'
+        ValidationUtils.validateNotPlaceholder(request.getUsername(), "Username");
+        ValidationUtils.validateNotPlaceholder(request.getEmail(), "Email");
+        ValidationUtils.validateNotPlaceholder(request.getPassword(), "Password");
+
         // 1. Verify username uniqueness
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username is already taken!");

@@ -5,6 +5,7 @@ import com.hrms.dto.RoleResponse;
 import com.hrms.entity.Role;
 import com.hrms.repository.RoleRepository;
 import com.hrms.service.RoleService;
+import com.hrms.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public RoleResponse createRole(RoleRequest request, String currentUsername) {
+        // Enforce validation to prevent blank values or placeholder 'string'
+        ValidationUtils.validateNotPlaceholder(request.getName(), "Role name");
+        ValidationUtils.validateOptionalNotPlaceholder(request.getDescription(), "Role description");
+
         String roleName = normalizeRoleName(request.getName());
 
         // Check if role name already exists in active roles
@@ -52,6 +57,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public RoleResponse updateRole(Long id, RoleRequest request, String currentUsername) {
+        // Enforce validation to prevent blank values or placeholder 'string'
+        ValidationUtils.validateNotPlaceholder(request.getName(), "Role name");
+        ValidationUtils.validateOptionalNotPlaceholder(request.getDescription(), "Role description");
+
         Role role = roleRepository.findByIdAndDeletedStatus(id, 0)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found or has been deleted!"));
 
