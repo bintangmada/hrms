@@ -50,12 +50,12 @@ public class SecurityConfig {
             
             // Set access permissions for endpoints
             .authorizeHttpRequests(auth -> auth
-                // Allow public auth endpoints
-                .requestMatchers("/api/v1/auth/**").permitAll()
+                // Allow public login and public staff registration endpoints
+                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register/staff").permitAll()
+                // Secure custom registration (admin only)
+                .requestMatchers("/api/v1/auth/register").hasAnyRole("SUPER_ADMIN", "ADMIN")
                 // Allow public Hello / testing endpoint
                 .requestMatchers("/api/v1/hello").permitAll()
-                // Allow public Role Management endpoints (master data setup)
-                .requestMatchers("/api/v1/roles/**").permitAll()
                 // Allow public Swagger UI and API Docs
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 // Any other endpoint must be authenticated

@@ -133,4 +133,57 @@ public class AuthServiceImpl implements AuthService {
                 .role(combinedRoles)
                 .build();
     }
+
+    @Override
+    @Transactional
+    public String registerStaffUser(RegisterRequest request) {
+        // 1. Verify username uniqueness
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException("Username is already taken!");
+        }
+
+        // 2. Verify email uniqueness
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email is already registered!");
+        }
+
+        // 3. Find or seed ROLE_STAFF
+        Role staffRole = roleRepository.findByNameAndDeletedStatus("ROLE_STAFF", 0)
+                .orElseGet(() -> {
+                    Role newRole = Role.builder()
+                            .name("ROLE_STAFF")
+                            .description("Auto-generated default staff role")
+                            .build();
+                    newRole.setCreatedBy("REGISTRATION_FLOW");
+                    newRole.setStatus(1);
+                    newRole.setDeletedStatus(0);
+                    return roleRepository.save(newRole);
+                });
+
+        // 4. Create and save the new User
+        User user = User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role("ROLE_STAFF")
+                .build();
+
+        user.setCreatedBy("REGISTRATION_FLOW");
+        user.setStatus(1);
+        user.setDeletedStatus(0);
+
+        User savedUser = userRepository.save(user);
+
+        // 5. Save relation in junction table UserRole
+        UserRole userRole = UserRole.builder()
+                .userId(savedUser.getId())
+                .roleId(staffRole.getId())
+                .build();
+        userRole.setCreatedBy("REGISTRATION_FLOW");
+        userRole.setStatus(1);
+        userRole.setDeletedStatus(0);
+        userRoleRepository.save(userRole);
+
+        return "Staff registered successfully!";
+    }
 }

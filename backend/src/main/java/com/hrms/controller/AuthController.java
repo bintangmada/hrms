@@ -29,10 +29,18 @@ public class AuthController {
     private final AuthService authService;
 
     // ENDPOINT: POST http://localhost:8020/api/v1/auth/register
-    @Operation(summary = "Register a new user account")
+    @Operation(summary = "Register a new user account (Admin/Super Admin only)")
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterRequest request) {
         String result = authService.registerUser(request);
+        return new ResponseEntity<>(ApiResponse.success(result), HttpStatus.CREATED);
+    }
+
+    // ENDPOINT: POST http://localhost:8020/api/v1/auth/register/staff
+    @Operation(summary = "Register a new standard employee/staff account (Public)")
+    @PostMapping("/register/staff")
+    public ResponseEntity<ApiResponse<String>> registerStaff(@Valid @RequestBody RegisterRequest request) {
+        String result = authService.registerStaffUser(request);
         return new ResponseEntity<>(ApiResponse.success(result), HttpStatus.CREATED);
     }
 
