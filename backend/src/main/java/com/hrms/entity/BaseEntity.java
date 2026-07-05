@@ -38,20 +38,20 @@ public abstract class BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Column(name = "status", length = 30)
-    private String status = "ACTIVE";
+    @Column(name = "status")
+    private Integer status = 1; // 1 = Active, 0 = Inactive
 
-    @Column(name = "deletes_status") // Matches "deletesStatus" from user request
-    private Boolean deletesStatus = false; // false = active, true = soft-deleted
+    @Column(name = "deleted_status")
+    private Integer deletedStatus = 0; // 0 = Active, 1 = Soft-deleted
 
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
-        if (this.deletesStatus == null) {
-            this.deletesStatus = false;
+        if (this.deletedStatus == null) {
+            this.deletedStatus = 0;
         }
         if (this.status == null) {
-            this.status = "ACTIVE";
+            this.status = 1;
         }
     }
 

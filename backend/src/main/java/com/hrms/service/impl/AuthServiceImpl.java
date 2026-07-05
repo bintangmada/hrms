@@ -56,8 +56,8 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         user.setCreatedBy("REGISTRATION_FLOW");
-        user.setStatus("ACTIVE");
-        user.setDeletesStatus(false);
+        user.setStatus(1);
+        user.setDeletedStatus(0);
 
         userRepository.save(user);
 
