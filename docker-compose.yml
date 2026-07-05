@@ -19,6 +19,7 @@ services:
     image: ghcr.io/bintangmada/hrms-backend:latest
     container_name: hrms-backend
     restart: always
+    network_mode: "bridge"
     
     # Memetakan port kontainer (8020) ke port lokal VPS (8020) agar bisa diakses Nginx OS
     ports:
