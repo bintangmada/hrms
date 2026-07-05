@@ -10,6 +10,7 @@ import com.hrms.repository.RoleRepository;
 import com.hrms.repository.UserRepository;
 import com.hrms.repository.UserRoleRepository;
 import com.hrms.security.JwtUtils;
+import com.hrms.service.EmailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -37,6 +38,8 @@ public class AuthServiceImplTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private JwtUtils jwtUtils;
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -56,7 +59,12 @@ public class AuthServiceImplTest {
                 .build();
 
         Role mockRole = Role.builder().id(1L).name("ROLE_STAFF").build();
-        User mockSavedUser = User.builder().id(100L).username("john_doe").email("john@example.com").build();
+        User mockSavedUser = User.builder()
+                .id(100L)
+                .username("john_doe")
+                .email("john@example.com")
+                .emailVerified(0)
+                .build();
 
         when(userRepository.existsByUsername("john_doe")).thenReturn(false);
         when(userRepository.existsByEmail("john@example.com")).thenReturn(false);
@@ -66,9 +74,11 @@ public class AuthServiceImplTest {
 
         String result = authService.registerUser(request);
 
-        assertEquals("User registered successfully!", result);
+        assertEquals("User registered successfully! Please check your email to verify your account.", result);
         verify(userRepository, times(1)).save(any(User.class));
         verify(userRoleRepository, times(1)).save(any(UserRole.class));
+        verify(emailService, times(1)).sendVerificationEmail(eq("john@example.com"), eq("john_doe"), anyString());
+        verify(emailService, times(1)).sendRoleAssignmentNotification(eq("john@example.com"), eq("john_doe"), eq(List.of("ROLE_STAFF")));
     }
 
     @Test
@@ -122,7 +132,12 @@ public class AuthServiceImplTest {
                 .build();
 
         Role staffRole = Role.builder().id(2L).name("ROLE_STAFF").build();
-        User mockSavedUser = User.builder().id(101L).username("staff_user").email("staff@example.com").build();
+        User mockSavedUser = User.builder()
+                .id(101L)
+                .username("staff_user")
+                .email("staff@example.com")
+                .emailVerified(0)
+                .build();
 
         when(userRepository.existsByUsername("staff_user")).thenReturn(false);
         when(userRepository.existsByEmail("staff@example.com")).thenReturn(false);
@@ -132,9 +147,10 @@ public class AuthServiceImplTest {
 
         String result = authService.registerStaffUser(request);
 
-        assertEquals("Staff registered successfully!", result);
+        assertEquals("Staff registered successfully! Please check your email to verify your account.", result);
         verify(userRepository, times(1)).save(any(User.class));
         verify(userRoleRepository, times(1)).save(any(UserRole.class));
+        verify(emailService, times(1)).sendVerificationEmail(eq("staff@example.com"), eq("staff_user"), anyString());
     }
 
     @Test
@@ -150,6 +166,7 @@ public class AuthServiceImplTest {
                 .email("john@example.com")
                 .password("hashedPassword")
                 .role("ROLE_STAFF")
+                .emailVerified(1) // Verified
                 .build();
 
         Role mockRole = Role.builder().id(1L).name("ROLE_STAFF").build();
@@ -171,6 +188,26 @@ public class AuthServiceImplTest {
     }
 
     @Test
+    public void testLoginUser_UnverifiedEmail() {
+        LoginRequest request = LoginRequest.builder()
+                .usernameOrEmail("john_doe")
+                .password("myPassword")
+                .build();
+
+        User user = User.builder()
+                .id(100L)
+                .username("john_doe")
+                .email("john@example.com")
+                .password("hashedPassword")
+                .emailVerified(0) // Unverified!
+                .build();
+
+        when(userRepository.findByUsername("john_doe")).thenReturn(Optional.of(user));
+
+        assertThrows(IllegalArgumentException.class, () -> authService.loginUser(request));
+    }
+
+    @Test
     public void testLoginUser_InvalidPassword() {
         LoginRequest request = LoginRequest.builder()
                 .usernameOrEmail("john_doe")
@@ -182,11 +219,39 @@ public class AuthServiceImplTest {
                 .username("john_doe")
                 .email("john@example.com")
                 .password("hashedPassword")
+                .emailVerified(1)
                 .build();
 
         when(userRepository.findByUsername("john_doe")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrongPassword", "hashedPassword")).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class, () -> authService.loginUser(request));
+    }
+
+    @Test
+    public void testConfirmEmail_Success() {
+        User user = User.builder()
+                .id(100L)
+                .username("john_doe")
+                .email("john@example.com")
+                .emailVerified(0)
+                .verificationToken("valid-token")
+                .build();
+
+        when(userRepository.findByVerificationTokenAndDeletedStatus("valid-token", 0)).thenReturn(Optional.of(user));
+
+        String result = authService.confirmEmail("valid-token");
+
+        assertEquals("Email verified successfully! You can now log in.", result);
+        assertEquals(1, user.getEmailVerified());
+        assertNull(user.getVerificationToken());
+        verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
+    public void testConfirmEmail_InvalidToken() {
+        when(userRepository.findByVerificationTokenAndDeletedStatus("invalid-token", 0)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> authService.confirmEmail("invalid-token"));
     }
 }

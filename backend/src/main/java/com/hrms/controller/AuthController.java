@@ -51,4 +51,12 @@ public class AuthController {
         AuthResponse response = authService.loginUser(request);
         return ResponseEntity.ok(ApiResponse.success("Login successful", response));
     }
+
+    // ENDPOINT: GET http://localhost:8020/api/v1/auth/confirm-email
+    @Operation(summary = "Confirm email verification token")
+    @GetMapping("/confirm-email")
+    public ResponseEntity<ApiResponse<String>> confirmEmail(@RequestParam String token) {
+        String result = authService.confirmEmail(token);
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
 }

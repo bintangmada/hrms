@@ -50,8 +50,8 @@ public class SecurityConfig {
             
             // Set access permissions for endpoints
             .authorizeHttpRequests(auth -> auth
-                // Allow public login and public staff registration endpoints
-                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register/staff").permitAll()
+                // Allow public login, public staff registration, and email confirmation endpoints
+                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register/staff", "/api/v1/auth/confirm-email").permitAll()
                 // Secure custom registration (admin only)
                 .requestMatchers("/api/v1/auth/register").hasAnyRole("SUPER_ADMIN", "ADMIN")
                 // Allow public Hello / testing endpoint

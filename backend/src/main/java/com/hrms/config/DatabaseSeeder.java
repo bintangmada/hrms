@@ -89,6 +89,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .email("superadmin@hrms.com")
                     .password(passwordEncoder.encode("superadmin123")) // Default password
                     .role("ROLE_SUPER_ADMIN")
+                    .emailVerified(1) // Super admin is pre-verified
                     .build();
             superAdminUser.setCreatedBy("SYSTEM_SEEDER");
             superAdminUser.setStatus(1);

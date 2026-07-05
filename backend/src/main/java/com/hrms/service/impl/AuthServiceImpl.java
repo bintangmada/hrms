@@ -20,6 +20,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.hrms.service.EmailService;
+import java.util.UUID;
+
 // ==============================================================================
 // AUTHENTICATION SERVICE IMPLEMENTATION
 // ==============================================================================
@@ -36,6 +39,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -74,11 +78,14 @@ public class AuthServiceImpl implements AuthService {
                 .collect(Collectors.joining(","));
 
         // 4. Create and save the new User
+        String verificationToken = UUID.randomUUID().toString();
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword())) // Hash password
                 .role(combinedRoles)
+                .emailVerified(0) // Requires verification
+                .verificationToken(verificationToken)
                 .build();
 
         user.setCreatedBy("REGISTRATION_FLOW");
@@ -99,7 +106,13 @@ public class AuthServiceImpl implements AuthService {
             userRoleRepository.save(userRole);
         }
 
-        return "User registered successfully!";
+        // 6. Send verification email and role assignment notification email
+        emailService.sendVerificationEmail(savedUser.getEmail(), savedUser.getUsername(), verificationToken);
+        
+        List<String> assignedRoleNames = rolesToAssign.stream().map(Role::getName).collect(Collectors.toList());
+        emailService.sendRoleAssignmentNotification(savedUser.getEmail(), savedUser.getUsername(), assignedRoleNames);
+
+        return "User registered successfully! Please check your email to verify your account.";
     }
 
     @Override
@@ -113,6 +126,11 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsername(request.getUsernameOrEmail())
                 .or(() -> userRepository.findByEmail(request.getUsernameOrEmail()))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid username or password!"));
+
+        // Check if email is verified
+        if (user.getEmailVerified() != 1) {
+            throw new IllegalArgumentException("Please verify your email address before logging in!");
+        }
 
         // 2. Check if password matches
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -176,11 +194,14 @@ public class AuthServiceImpl implements AuthService {
                 });
 
         // 4. Create and save the new User
+        String verificationToken = UUID.randomUUID().toString();
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role("ROLE_STAFF")
+                .emailVerified(0) // Requires verification
+                .verificationToken(verificationToken)
                 .build();
 
         user.setCreatedBy("REGISTRATION_FLOW");
@@ -199,6 +220,23 @@ public class AuthServiceImpl implements AuthService {
         userRole.setDeletedStatus(0);
         userRoleRepository.save(userRole);
 
-        return "Staff registered successfully!";
+        // 6. Send verification email and role assignment notification email
+        emailService.sendVerificationEmail(savedUser.getEmail(), savedUser.getUsername(), verificationToken);
+        emailService.sendRoleAssignmentNotification(savedUser.getEmail(), savedUser.getUsername(), List.of("ROLE_STAFF"));
+
+        return "Staff registered successfully! Please check your email to verify your account.";
+    }
+
+    @Override
+    @Transactional
+    public String confirmEmail(String token) {
+        User user = userRepository.findByVerificationTokenAndDeletedStatus(token, 0)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid or expired email verification token!"));
+
+        user.setEmailVerified(1);
+        user.setVerificationToken(null);
+        userRepository.save(user);
+
+        return "Email verified successfully! You can now log in.";
     }
 }

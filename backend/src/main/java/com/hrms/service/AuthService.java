@@ -14,4 +14,5 @@ public interface AuthService {
     String registerUser(RegisterRequest request);
     String registerStaffUser(RegisterRequest request);
     AuthResponse loginUser(LoginRequest request);
+    String confirmEmail(String token);
 }

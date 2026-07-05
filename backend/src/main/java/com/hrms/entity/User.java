@@ -33,4 +33,11 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, length = 30)
     private String role; // e.g. "ROLE_ADMIN", "ROLE_STAFF"
+
+    @Builder.Default
+    @Column(name = "email_verified", nullable = false)
+    private Integer emailVerified = 0; // 0 = Unverified, 1 = Verified
+
+    @Column(name = "verification_token", length = 100)
+    private String verificationToken;
 }

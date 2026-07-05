@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.hrms.service.EmailService;
+
 @Service
 @RequiredArgsConstructor
 public class RoleMenuServiceImpl implements RoleMenuService {
@@ -31,6 +33,7 @@ public class RoleMenuServiceImpl implements RoleMenuService {
     private final MenuRepository menuRepository;
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -69,6 +72,26 @@ public class RoleMenuServiceImpl implements RoleMenuService {
         }
 
         RoleMenu saved = roleMenuRepository.save(roleMenu);
+
+        // Notify all users who are assigned to this role of the permission update
+        List<UserRole> userRoles = userRoleRepository.findAllByRoleIdAndDeletedStatus(request.getRoleId(), 0);
+        String actionDetails = String.format("Read: %s, Write: %s, Delete: %s",
+                request.getCanRead() == 1 ? "GRANTED" : "REVOKED",
+                request.getCanWrite() == 1 ? "GRANTED" : "REVOKED",
+                request.getCanDelete() == 1 ? "GRANTED" : "REVOKED");
+
+        for (UserRole ur : userRoles) {
+            userRepository.findById(ur.getUserId()).ifPresent(user -> {
+                emailService.sendPermissionChangeNotification(
+                        user.getEmail(),
+                        user.getUsername(),
+                        role.getName(),
+                        menu.getName(),
+                        actionDetails
+                );
+            });
+        }
+
         return mapToResponse(saved);
     }
 

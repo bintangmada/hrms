@@ -76,6 +76,12 @@
 
 
 
+        <!-- Spring Boot Starter Mail for sending confirmation/notification emails -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- Spring Boot Starter Test for unit testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

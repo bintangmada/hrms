@@ -13,6 +13,7 @@ import com.hrms.repository.RoleRepository;
 import com.hrms.repository.RoleMenuRepository;
 import com.hrms.repository.UserRepository;
 import com.hrms.repository.UserRoleRepository;
+import com.hrms.service.EmailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -39,6 +40,8 @@ public class RoleMenuServiceImplTest {
     private UserRepository userRepository;
     @Mock
     private UserRoleRepository userRoleRepository;
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private RoleMenuServiceImpl roleMenuService;
