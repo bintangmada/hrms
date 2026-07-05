@@ -55,6 +55,10 @@ public class AuthServiceImpl implements AuthService {
                 .role(role)
                 .build();
 
+        user.setCreatedBy("REGISTRATION_FLOW");
+        user.setStatus("ACTIVE");
+        user.setDeletesStatus(false);
+
         userRepository.save(user);
 
         return "User registered successfully!";
