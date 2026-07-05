@@ -51,37 +51,14 @@ public class AuthServiceImpl implements AuthService {
 
         // 3. Determine the user roles and verify existence
         List<Long> roleIds = request.getRoleIds();
+        if (roleIds == null || roleIds.isEmpty()) {
+            throw new IllegalArgumentException("At least one role ID must be selected!");
+        }
+
         List<Role> rolesToAssign = new java.util.ArrayList<>();
-
-        if (roleIds != null && !roleIds.isEmpty()) {
-            for (Long roleId : roleIds) {
-                Role roleEntity = roleRepository.findByIdAndDeletedStatus(roleId, 0)
-                        .orElseThrow(() -> new IllegalArgumentException("Role with ID " + roleId + " not found or deleted!"));
-                rolesToAssign.add(roleEntity);
-            }
-        } else {
-            // Fallback to legacy string role
-            String roleName = request.getRole();
-            if (roleName == null || roleName.isBlank()) {
-                roleName = "ROLE_ADMIN"; // Default
-            } else if (!roleName.toUpperCase().startsWith("ROLE_")) {
-                roleName = "ROLE_" + roleName.toUpperCase();
-            } else {
-                roleName = roleName.toUpperCase();
-            }
-
-            final String finalRoleName = roleName;
-            Role roleEntity = roleRepository.findByNameAndDeletedStatus(finalRoleName, 0)
-                    .orElseGet(() -> {
-                        Role newRole = Role.builder()
-                                .name(finalRoleName)
-                                .description("Auto-generated default role")
-                                .build();
-                        newRole.setCreatedBy("REGISTRATION_FLOW");
-                        newRole.setStatus(1);
-                        newRole.setDeletedStatus(0);
-                        return roleRepository.save(newRole);
-                    });
+        for (Long roleId : roleIds) {
+            Role roleEntity = roleRepository.findByIdAndDeletedStatus(roleId, 0)
+                    .orElseThrow(() -> new IllegalArgumentException("Role with ID " + roleId + " not found or deleted!"));
             rolesToAssign.add(roleEntity);
         }
 

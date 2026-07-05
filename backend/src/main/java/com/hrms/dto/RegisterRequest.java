@@ -31,7 +31,5 @@ public class RegisterRequest {
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
-    private String role; // e.g. "ROLE_ADMIN", "ROLE_STAFF"
-
     private java.util.List<Long> roleIds; // Associating roles by ID during registration
 }
