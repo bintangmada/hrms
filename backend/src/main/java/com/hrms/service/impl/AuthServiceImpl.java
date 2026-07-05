@@ -3,7 +3,11 @@ package com.hrms.service.impl;
 import com.hrms.dto.AuthResponse;
 import com.hrms.dto.LoginRequest;
 import com.hrms.dto.RegisterRequest;
+import com.hrms.entity.Role;
+import com.hrms.entity.UserRole;
 import com.hrms.entity.User;
+import com.hrms.repository.RoleRepository;
+import com.hrms.repository.UserRoleRepository;
 import com.hrms.repository.UserRepository;
 import com.hrms.security.JwtUtils;
 import com.hrms.service.AuthService;
@@ -11,11 +15,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 // ==============================================================================
 // AUTHENTICATION SERVICE IMPLEMENTATION
 // ==============================================================================
-// Implements manual register and login logic including password hashing and JWT.
+// Implements manual register and login logic. Handles manual Many-to-Many
+// relationships between Users and Roles without JPA relationship annotations.
 // ==============================================================================
 
 @Service
@@ -23,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
 
@@ -39,29 +49,72 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Email is already registered!");
         }
 
-        // 3. Determine the user role
-        String role = request.getRole();
-        if (role == null || role.isBlank()) {
-            role = "ROLE_ADMIN"; // Default role is now ROLE_ADMIN
-        } else if (!role.toUpperCase().startsWith("ROLE_")) {
-            role = "ROLE_" + role.toUpperCase();
+        // 3. Determine the user roles and verify existence
+        List<Long> roleIds = request.getRoleIds();
+        List<Role> rolesToAssign = new java.util.ArrayList<>();
+
+        if (roleIds != null && !roleIds.isEmpty()) {
+            for (Long roleId : roleIds) {
+                Role roleEntity = roleRepository.findByIdAndDeletedStatus(roleId, 0)
+                        .orElseThrow(() -> new IllegalArgumentException("Role with ID " + roleId + " not found or deleted!"));
+                rolesToAssign.add(roleEntity);
+            }
         } else {
-            role = role.toUpperCase();
+            // Fallback to legacy string role
+            String roleName = request.getRole();
+            if (roleName == null || roleName.isBlank()) {
+                roleName = "ROLE_ADMIN"; // Default
+            } else if (!roleName.toUpperCase().startsWith("ROLE_")) {
+                roleName = "ROLE_" + roleName.toUpperCase();
+            } else {
+                roleName = roleName.toUpperCase();
+            }
+
+            final String finalRoleName = roleName;
+            Role roleEntity = roleRepository.findByNameAndDeletedStatus(finalRoleName, 0)
+                    .orElseGet(() -> {
+                        Role newRole = Role.builder()
+                                .name(finalRoleName)
+                                .description("Auto-generated default role")
+                                .build();
+                        newRole.setCreatedBy("REGISTRATION_FLOW");
+                        newRole.setStatus(1);
+                        newRole.setDeletedStatus(0);
+                        return roleRepository.save(newRole);
+                    });
+            rolesToAssign.add(roleEntity);
         }
+
+        // Join role names for User's single-column fallback (comma-separated)
+        String combinedRoles = rolesToAssign.stream()
+                .map(Role::getName)
+                .collect(Collectors.joining(","));
 
         // 4. Create and save the new User
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword())) // Hash password
-                .role(role)
+                .role(combinedRoles)
                 .build();
 
         user.setCreatedBy("REGISTRATION_FLOW");
         user.setStatus(1);
         user.setDeletedStatus(0);
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // 5. Save Many-to-Many relations in junction table UserRole
+        for (Role r : rolesToAssign) {
+            UserRole userRole = UserRole.builder()
+                    .userId(savedUser.getId())
+                    .roleId(r.getId())
+                    .build();
+            userRole.setCreatedBy("REGISTRATION_FLOW");
+            userRole.setStatus(1);
+            userRole.setDeletedStatus(0);
+            userRoleRepository.save(userRole);
+        }
 
         return "User registered successfully!";
     }
@@ -79,15 +132,28 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Invalid username or password!");
         }
 
-        // 3. Generate JWT Token
-        String token = jwtUtils.generateToken(user.getUsername(), user.getEmail(), user.getRole());
+        // 3. Load roles dynamically from junction table (in case User.role is out of sync)
+        List<UserRole> userRoles = userRoleRepository.findAllByUserIdAndDeletedStatus(user.getId(), 0);
+        String combinedRoles;
+        if (!userRoles.isEmpty()) {
+            combinedRoles = userRoles.stream()
+                    .map(ur -> roleRepository.findByIdAndDeletedStatus(ur.getRoleId(), 0))
+                    .filter(java.util.Optional::isPresent)
+                    .map(opt -> opt.get().getName())
+                    .collect(Collectors.joining(","));
+        } else {
+            combinedRoles = user.getRole(); // fallback
+        }
 
-        // 4. Return AuthResponse
+        // 4. Generate JWT Token
+        String token = jwtUtils.generateToken(user.getUsername(), user.getEmail(), combinedRoles);
+
+        // 5. Return AuthResponse
         return AuthResponse.builder()
                 .token(token)
                 .username(user.getUsername())
                 .email(user.getEmail())
-                .role(user.getRole())
+                .role(combinedRoles)
                 .build();
     }
 }

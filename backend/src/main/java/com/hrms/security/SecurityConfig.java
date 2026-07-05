@@ -54,6 +54,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 // Allow public Hello / testing endpoint
                 .requestMatchers("/api/v1/hello").permitAll()
+                // Allow public Role Management endpoints (master data setup)
+                .requestMatchers("/api/v1/roles/**").permitAll()
                 // Allow public Swagger UI and API Docs
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 // Any other endpoint must be authenticated
