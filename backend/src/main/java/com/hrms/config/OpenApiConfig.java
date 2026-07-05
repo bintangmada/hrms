@@ -3,8 +3,10 @@ package com.hrms.config;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import java.util.List;
 
 // ==============================================================================
 // SWAGGER OPENAPI CONFIGURATION
@@ -18,6 +20,16 @@ public class OpenApiConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
+        // Define production server using HTTPS to prevent Mixed Content errors in the browser
+        Server productionServer = new Server()
+                .url("https://api.bintangmada.web.id")
+                .description("Production Server (HTTPS)");
+
+        // Define local server for local debugging
+        Server localServer = new Server()
+                .url("http://localhost:8020")
+                .description("Local Development Server (HTTP)");
+
         return new OpenAPI()
                 .info(new Info()
                         .title("HRMS API Documentation")
@@ -25,7 +37,8 @@ public class OpenApiConfig {
                         .description("Official REST API Documentation for the Human Resource Management System (HRMS). You can test all the CRUD endpoints directly from this interface.")
                         .contact(new Contact()
                                 .name("Bintang Mada")
-                                .url("https://github.com/bintangmada")));
+                                .url("https://github.com/bintangmada")))
+                .servers(List.of(productionServer, localServer));
     }
 }
 
