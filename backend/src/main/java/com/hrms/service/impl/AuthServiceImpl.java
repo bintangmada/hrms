@@ -42,9 +42,11 @@ public class AuthServiceImpl implements AuthService {
         // 3. Determine the user role
         String role = request.getRole();
         if (role == null || role.isBlank()) {
-            role = "ROLE_STAFF"; // Default role
-        } else if (!role.startsWith("ROLE_")) {
+            role = "ROLE_ADMIN"; // Default role is now ROLE_ADMIN
+        } else if (!role.toUpperCase().startsWith("ROLE_")) {
             role = "ROLE_" + role.toUpperCase();
+        } else {
+            role = role.toUpperCase();
         }
 
         // 4. Create and save the new User
