@@ -45,9 +45,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         // Resolve optional User link
-        User user = null;
         if (request.getUserId() != null) {
-            user = userRepository.findByIdAndDeletedStatus(request.getUserId(), 0)
+            userRepository.findByIdAndDeletedStatus(request.getUserId(), 0)
                     .orElseThrow(() -> new IllegalArgumentException("User not found or has been deleted!"));
 
             // Verify User is not already linked to another employee
@@ -66,7 +65,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .department(request.getDepartment())
                 .joinDate(request.getJoinDate())
                 .salary(request.getSalary())
-                .user(user)
+                .userId(request.getUserId())
                 .build();
 
         // Audit Trail Setup
@@ -114,19 +113,17 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         // Resolve optional User link if changed
-        User user = employee.getUser();
-        if (request.getUserId() != null) {
-            if (user == null || !user.getId().equals(request.getUserId())) {
-                user = userRepository.findByIdAndDeletedStatus(request.getUserId(), 0)
+        Long newUserId = request.getUserId();
+        if (newUserId != null) {
+            if (employee.getUserId() == null || !employee.getUserId().equals(newUserId)) {
+                userRepository.findByIdAndDeletedStatus(newUserId, 0)
                         .orElseThrow(() -> new IllegalArgumentException("User not found or has been deleted!"));
 
                 // Verify User is not already linked to another employee
-                if (employeeRepository.findByUserIdAndDeletedStatus(request.getUserId(), 0).isPresent()) {
+                if (employeeRepository.findByUserIdAndDeletedStatus(newUserId, 0).isPresent()) {
                     throw new IllegalArgumentException("User is already linked to another employee!");
                 }
             }
-        } else {
-            user = null;
         }
 
         employee.setNik(request.getNik());
@@ -138,7 +135,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setDepartment(request.getDepartment());
         employee.setJoinDate(request.getJoinDate());
         employee.setSalary(request.getSalary());
-        employee.setUser(user);
+        employee.setUserId(newUserId);
 
         // Audit Trail Setup
         employee.setUpdatedBy(currentUsername != null ? currentUsername : "SYSTEM");
@@ -199,9 +196,10 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .status(employee.getStatus())
                 .deletedStatus(employee.getDeletedStatus());
 
-        if (employee.getUser() != null) {
-            builder.userId(employee.getUser().getId())
-                   .username(employee.getUser().getUsername());
+        if (employee.getUserId() != null) {
+            builder.userId(employee.getUserId());
+            userRepository.findByIdAndDeletedStatus(employee.getUserId(), 0)
+                    .ifPresent(user -> builder.username(user.getUsername()));
         }
 
         return builder.build();

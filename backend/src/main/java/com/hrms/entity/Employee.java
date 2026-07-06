@@ -52,7 +52,6 @@ public class Employee extends BaseEntity {
     @Column(precision = 15, scale = 2)
     private BigDecimal salary;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", unique = true)
-    private User user; // Linked login account (nullable)
+    @Column(name = "user_id", unique = true)
+    private Long userId; // Linked login account ID (nullable)
 }

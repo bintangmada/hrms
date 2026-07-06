@@ -63,7 +63,7 @@ public class EmployeeServiceImplTest {
                 .department("IT")
                 .joinDate(LocalDate.now())
                 .salary(BigDecimal.valueOf(10000000))
-                .user(user)
+                .userId(1L)
                 .build();
         mockSavedEmployee.setCreatedBy("admin");
         mockSavedEmployee.setDeletedStatus(0);
@@ -176,7 +176,6 @@ public class EmployeeServiceImplTest {
                 .userId(2L)
                 .build();
 
-        User oldUser = User.builder().id(1L).username("olduser").build();
         User newUser = User.builder().id(2L).username("newuser").build();
 
         Employee existing = Employee.builder()
@@ -184,7 +183,7 @@ public class EmployeeServiceImplTest {
                 .nik("123")
                 .firstName("John")
                 .email("john@example.com")
-                .user(oldUser)
+                .userId(1L)
                 .build();
 
         Employee updated = Employee.builder()
@@ -192,7 +191,7 @@ public class EmployeeServiceImplTest {
                 .nik("123456")
                 .firstName("John Updated")
                 .email("john.updated@example.com")
-                .user(newUser)
+                .userId(2L)
                 .build();
 
         when(employeeRepository.findByIdAndDeletedStatus(100L, 0)).thenReturn(Optional.of(existing));
