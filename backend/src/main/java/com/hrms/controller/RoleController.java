@@ -1,0 +1,86 @@
+package com.hrms.controller;
+
+import com.hrms.dto.ApiResponse;
+import com.hrms.dto.RoleRequest;
+import com.hrms.dto.RoleResponse;
+import com.hrms.service.RoleService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+// ==============================================================================
+// ROLE CONTROLLER
+// ==============================================================================
+// Exposes REST APIs for Role Master Data CRUD operations.
+// Strict compliance: Only GET and POST methods are used. No PUT or DELETE.
+// ==============================================================================
+
+@RestController
+@RequestMapping("/api/v1/roles")
+@RequiredArgsConstructor
+@Tag(name = "Role Management", description = "Endpoints for managing Role master data (GET and POST only)")
+public class RoleController {
+
+    private final RoleService roleService;
+
+    // Helper to extract the authenticated username for the audit trail
+    private String getCurrentUsername() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
+            return authentication.getName();
+        }
+        return "SYSTEM";
+    }
+
+    // ENDPOINT: GET http://localhost:8020/api/v1/roles
+    @Operation(summary = "Get list of all active roles")
+    @GetMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+    public ResponseEntity<ApiResponse<List<RoleResponse>>> getAllRoles() {
+        List<RoleResponse> response = roleService.getAllActiveRoles();
+        return ResponseEntity.ok(ApiResponse.success("Roles retrieved successfully", response));
+    }
+
+    // ENDPOINT: GET http://localhost:8020/api/v1/roles/{id}
+    @Operation(summary = "Get active role details by ID")
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+    public ResponseEntity<ApiResponse<RoleResponse>> getRoleById(@PathVariable Long id) {
+        RoleResponse response = roleService.getRoleById(id);
+        return ResponseEntity.ok(ApiResponse.success("Role details retrieved successfully", response));
+    }
+
+    // ENDPOINT: POST http://localhost:8020/api/v1/roles
+    @Operation(summary = "Create a new role")
+    @PostMapping
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<RoleResponse>> createRole(@Valid @RequestBody RoleRequest request) {
+        RoleResponse response = roleService.createRole(request, getCurrentUsername());
+        return new ResponseEntity<>(ApiResponse.success("Role created successfully", response), HttpStatus.CREATED);
+    }
+
+    // ENDPOINT: POST http://localhost:8020/api/v1/roles/{id}/update
+    @Operation(summary = "Update an existing role")
+    @PostMapping("/{id}/update")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<RoleResponse>> updateRole(@PathVariable Long id, @Valid @RequestBody RoleRequest request) {
+        RoleResponse response = roleService.updateRole(id, request, getCurrentUsername());
+        return ResponseEntity.ok(ApiResponse.success("Role updated successfully", response));
+    }
+
+    // ENDPOINT: POST http://localhost:8020/api/v1/roles/{id}/delete
+    @Operation(summary = "Soft-delete an existing role")
+    @PostMapping("/{id}/delete")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<String>> deleteRole(@PathVariable Long id) {
+        String result = roleService.deleteRole(id, getCurrentUsername());
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+}

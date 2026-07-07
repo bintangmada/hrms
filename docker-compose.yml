@@ -19,6 +19,7 @@ services:
     image: ghcr.io/bintangmada/hrms-backend:latest
     container_name: hrms-backend
     restart: always
+    network_mode: "bridge"
     
     # Memetakan port kontainer (8020) ke port lokal VPS (8020) agar bisa diakses Nginx OS
     ports:
@@ -37,6 +38,13 @@ services:
       # Konfigurasi JPA Hibernate
       - JPA_DDL_AUTO=update
       - JPA_SHOW_SQL=true
+      
+      # Konfigurasi Pengiriman Email (SMTP)
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - APP_BASE_URL=${APP_BASE_URL}
       
       # OPTIMASI MEMORI JVM (Sangat penting agar hemat RAM di VPS 4GB)
       - JAVA_OPTS=-Xms64m -Xmx256m -XX:+UseSerialGC -XX:MaxMetaspaceSize=80m
