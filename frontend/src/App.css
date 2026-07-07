@@ -195,42 +195,40 @@
 
 .auth-card {
   width: 100%;
-  max-width: 480px;
-  padding: 40px;
+  max-width: 400px;
+  padding: 36px 30px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.auth-logo-text {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--text-main);
+  text-transform: uppercase;
+  margin-bottom: 20px;
 }
 
 .auth-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 }
 
-.auth-brand-logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-md);
-  background: var(--primary-gradient);
-  margin-bottom: 20px;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
-}
-
-.sparkle-icon {
-  color: white;
-  animation: rotateSparkle 3s linear infinite;
-}
-
-@keyframes rotateSparkle {
-  0% { transform: rotate(0deg); }
-  50% { transform: rotate(180deg) scale(1.1); }
-  100% { transform: rotate(360deg); }
+.auth-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+  margin-bottom: 6px;
 }
 
 .auth-subtitle {
   color: var(--text-muted);
-  font-size: 0.9rem;
-  margin-top: 8px;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 .auth-form {
@@ -239,46 +237,28 @@
   gap: 16px;
 }
 
-.input-with-icon {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.input-icon {
-  position: absolute;
-  left: 16px;
-  color: var(--text-dark);
-  pointer-events: none;
-}
-
-.form-input.icon-padding {
-  padding-left: 48px;
-}
-
 .btn-full {
   width: 100%;
   justify-content: center;
-  padding: 14px;
+  padding: 12px;
 }
 
 .auth-footer {
   text-align: center;
   margin-top: 24px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
 }
 
 .auth-link {
-  color: #818cf8;
-  text-decoration: none;
+  color: var(--text-main);
+  text-decoration: underline;
   font-weight: 600;
   transition: var(--transition);
 }
 
 .auth-link:hover {
-  color: white;
-  text-decoration: underline;
+  color: var(--text-muted);
 }
 
 /* Page Header & Subtitle */

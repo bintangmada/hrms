@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, LogIn, Sparkles } from 'lucide-react';
 import { api } from '../services/api';
 
 interface LoginProps {
@@ -39,47 +38,39 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, showToast }) => {
   };
 
   return (
-    <main className="auth-page-container">
-      <div className="auth-card glass-panel animate-slide-up">
+    <main className="auth-page-container animate-fade-in">
+      <div className="auth-card">
         <header className="auth-header">
-          <div className="auth-brand-logo">
-            <Sparkles size={28} className="sparkle-icon" />
-          </div>
-          <h1 id="login-title">HRMS Portal</h1>
-          <p className="auth-subtitle">Sign in to manage employees, permissions and settings</p>
+          <div className="auth-logo-text">HRMS</div>
+          <h1 id="login-title">Sign In</h1>
+          <p className="auth-subtitle">Welcome back. Enter your credentials to access your account.</p>
         </header>
 
         <form onSubmit={handleLogin} className="auth-form">
           <div className="form-group">
             <label className="form-label" htmlFor="usernameOrEmail">Username or Email</label>
-            <div className="input-with-icon">
-              <Mail size={18} className="input-icon" />
-              <input
-                id="usernameOrEmail"
-                type="text"
-                className="form-input icon-padding"
-                placeholder="Enter username or email"
-                value={usernameOrEmail}
-                onChange={(e) => setUsernameOrEmail(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              id="usernameOrEmail"
+              type="text"
+              className="form-input"
+              placeholder="name@example.com"
+              value={usernameOrEmail}
+              onChange={(e) => setUsernameOrEmail(e.target.value)}
+              required
+            />
           </div>
 
           <div className="form-group">
             <label className="form-label" htmlFor="password">Password</label>
-            <div className="input-with-icon">
-              <Lock size={18} className="input-icon" />
-              <input
-                id="password"
-                type="password"
-                className="form-input icon-padding"
-                placeholder="Enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              id="password"
+              type="password"
+              className="form-input"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
 
           <button
@@ -88,14 +79,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, showToast }) => {
             disabled={loading}
             id="btn-submit-login"
           >
-            {loading ? (
-              <span className="spinner"></span>
-            ) : (
-              <>
-                <LogIn size={18} />
-                <span>Sign In</span>
-              </>
-            )}
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 

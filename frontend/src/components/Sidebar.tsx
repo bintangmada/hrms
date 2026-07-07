@@ -32,7 +32,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       <div className="user-profile-section">
         <div className="user-avatar-wrapper">
           <div className="user-avatar">{user ? getInitials(user.username) : 'U'}</div>
-          <div className="avatar-ring"></div>
         </div>
         <div className="user-details">
           <div className="user-name">{user ? user.username : 'Guest User'}</div>

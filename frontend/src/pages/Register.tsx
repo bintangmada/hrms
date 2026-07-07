@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, User, UserPlus, Sparkles } from 'lucide-react';
 import { api } from '../services/api';
 
 interface RegisterProps {
@@ -45,63 +44,52 @@ export const Register: React.FC<RegisterProps> = ({ showToast }) => {
   };
 
   return (
-    <main className="auth-page-container">
-      <div className="auth-card glass-panel animate-slide-up">
+    <main className="auth-page-container animate-fade-in">
+      <div className="auth-card">
         <header className="auth-header">
-          <div className="auth-brand-logo">
-            <Sparkles size={28} className="sparkle-icon" />
-          </div>
-          <h1 id="register-title">Create Staff Account</h1>
-          <p className="auth-subtitle">Get started with our HRMS portal by setting up your credentials</p>
+          <div className="auth-logo-text">HRMS</div>
+          <h1 id="register-title">Create Account</h1>
+          <p className="auth-subtitle">Get started by setting up your staff credentials.</p>
         </header>
 
         <form onSubmit={handleRegister} className="auth-form">
           <div className="form-group">
             <label className="form-label" htmlFor="username">Username</label>
-            <div className="input-with-icon">
-              <User size={18} className="input-icon" />
-              <input
-                id="username"
-                type="text"
-                className="form-input icon-padding"
-                placeholder="Choose a username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              id="username"
+              type="text"
+              className="form-input"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
           </div>
 
           <div className="form-group">
             <label className="form-label" htmlFor="email">Email Address</label>
-            <div className="input-with-icon">
-              <Mail size={18} className="input-icon" />
-              <input
-                id="email"
-                type="email"
-                className="form-input icon-padding"
-                placeholder="Enter your corporate/personal email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              id="email"
+              type="email"
+              className="form-input"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
 
           <div className="form-group">
             <label className="form-label" htmlFor="password">Password</label>
-            <div className="input-with-icon">
-              <Lock size={18} className="input-icon" />
-              <input
-                id="password"
-                type="password"
-                className="form-input icon-padding"
-                placeholder="Create a strong password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              id="password"
+              type="password"
+              className="form-input"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
 
           <button
@@ -110,14 +98,7 @@ export const Register: React.FC<RegisterProps> = ({ showToast }) => {
             disabled={loading}
             id="btn-submit-register"
           >
-            {loading ? (
-              <span className="spinner"></span>
-            ) : (
-              <>
-                <UserPlus size={18} />
-                <span>Sign Up</span>
-              </>
-            )}
+            {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
 
