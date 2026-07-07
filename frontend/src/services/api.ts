@@ -118,7 +118,7 @@ export const api = {
       return res;
     },
     register: async (payload: any) => {
-      return request<ApiResponse<UserDto>>('/api/v1/auth/register', {
+      return request<ApiResponse<UserDto>>('/api/v1/auth/register/staff', {
         method: 'POST',
         body: JSON.stringify(payload),
       });
