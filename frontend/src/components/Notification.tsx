@@ -25,7 +25,7 @@ export const Notification: React.FC<NotificationProps> = ({ message, onClose }) 
   if (!message) return null;
 
   return (
-    <div className={`toast-container animate-slide-up ${message.type}`}>
+    <div className={`toast-container animate-slide-down ${message.type}`}>
       <div className="toast-icon">
         {message.type === 'success' ? (
           <CheckCircle2 size={20} color="#10b981" />
