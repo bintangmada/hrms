@@ -7,12 +7,15 @@ import { Register } from './pages/Register';
 import { ConfirmEmail } from './pages/ConfirmEmail';
 import { Dashboard } from './pages/Dashboard';
 import { Employees } from './pages/Employees';
-import { getToken } from './services/api';
+import { getToken, getCurrentUser } from './services/api';
 import './App.css';
 
 export const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!getToken());
   const [toast, setToast] = useState<ToastMessage | null>(null);
+  
+  const user = getCurrentUser();
+  const isAdmin = user && (user.role.includes('ROLE_ADMIN') || user.role.includes('ROLE_SUPER_ADMIN'));
 
   const showToast = (text: string, type: 'success' | 'error') => {
     setToast({
@@ -68,7 +71,7 @@ export const App: React.FC = () => {
                   <main className="main-content">
                     <Routes>
                       <Route path="/dashboard" element={<Dashboard showToast={showToast} />} />
-                      <Route path="/employees" element={<Employees showToast={showToast} />} />
+                      {isAdmin && <Route path="/employees" element={<Employees showToast={showToast} />} />}
                       <Route path="*" element={<Navigate to="/dashboard" replace />} />
                     </Routes>
                   </main>

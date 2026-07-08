@@ -22,6 +22,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     return name.slice(0, 2).toUpperCase();
   };
 
+  const isAdmin = user && (user.role.includes('ROLE_ADMIN') || user.role.includes('ROLE_SUPER_ADMIN'));
+
   return (
     <aside className="sidebar-container glass-panel">
       <div className="sidebar-brand">
@@ -49,13 +51,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
           <LayoutDashboard size={20} />
           <span>Dashboard</span>
         </NavLink>
-        <NavLink 
-          to="/employees" 
-          className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-        >
-          <Users size={20} />
-          <span>Employees</span>
-        </NavLink>
+        {isAdmin && (
+          <NavLink 
+            to="/employees" 
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+          >
+            <Users size={20} />
+            <span>Employees</span>
+          </NavLink>
+        )}
       </nav>
 
       <div className="sidebar-footer">
