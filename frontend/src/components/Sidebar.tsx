@@ -1,13 +1,14 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, LogOut } from 'lucide-react';
-import { removeToken, removeCurrentUser, getCurrentUser } from '../services/api';
+import { LayoutDashboard, Users, LogOut, Shield, Wallet, Clock } from 'lucide-react';
+import { removeToken, removeCurrentUser, getCurrentUser, UserPermissionResponse } from '../services/api';
 
 interface SidebarProps {
   onLogout: () => void;
+  permissions: UserPermissionResponse[];
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ onLogout, permissions }) => {
   const user = getCurrentUser();
   const navigate = useNavigate();
 
@@ -23,6 +24,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   };
 
   const isAdmin = user && (user.role.includes('ROLE_ADMIN') || user.role.includes('ROLE_SUPER_ADMIN'));
+
+  const hasMenuPermission = (menuCode: string) => {
+    if (isAdmin) return true;
+    return permissions.some(p => p.menuCode === menuCode && p.canRead === 1);
+  };
 
   return (
     <aside className="sidebar-container glass-panel">
@@ -51,13 +57,48 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
           <LayoutDashboard size={20} />
           <span>Dashboard</span>
         </NavLink>
-        {isAdmin && (
+
+        {(isAdmin || hasMenuPermission('EMPLOYEE')) && (
           <NavLink 
             to="/employees" 
             className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            id="nav-link-employees"
           >
             <Users size={20} />
             <span>Employees</span>
+          </NavLink>
+        )}
+
+        {(isAdmin || hasMenuPermission('ATTENDANCE')) && (
+          <NavLink 
+            to="/attendance" 
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            id="nav-link-attendance"
+          >
+            <Clock size={20} />
+            <span>Attendance</span>
+          </NavLink>
+        )}
+
+        {(isAdmin || hasMenuPermission('FINANCE')) && (
+          <NavLink 
+            to="/finance" 
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            id="nav-link-finance"
+          >
+            <Wallet size={20} />
+            <span>Finance</span>
+          </NavLink>
+        )}
+
+        {isAdmin && (
+          <NavLink 
+            to="/roles" 
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            id="nav-link-roles"
+          >
+            <Shield size={20} />
+            <span>Roles & Perms</span>
           </NavLink>
         )}
       </nav>
@@ -71,3 +112,4 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     </aside>
   );
 };
+

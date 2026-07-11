@@ -163,10 +163,124 @@ export const api = {
   },
   users: {
     getAll: async () => {
-      // Safe fallback if user endpoint is restricted: fetch all active users
-      // This is helpful to populate the 'Linked User' dropdown when configuring an employee profile
       const res = await request<ApiResponse<UserDto[]>>('/api/v1/users');
+      return res.data;
+    },
+    getById: async (id: number) => {
+      const res = await request<ApiResponse<UserDto>>(`/api/v1/users/${id}`);
+      return res.data;
+    },
+    updateRoles: async (id: number, roleIds: number[]) => {
+      const res = await request<ApiResponse<UserDto>>(`/api/v1/users/${id}/roles`, {
+        method: 'POST',
+        body: JSON.stringify({ roleIds }),
+      });
+      return res.data;
+    }
+  },
+  roles: {
+    getAll: async () => {
+      const res = await request<ApiResponse<RoleDto[]>>('/api/v1/roles');
+      return res.data;
+    },
+    getById: async (id: number) => {
+      const res = await request<ApiResponse<RoleDto>>(`/api/v1/roles/${id}`);
+      return res.data;
+    },
+    create: async (payload: RoleRequest) => {
+      const res = await request<ApiResponse<RoleDto>>('/api/v1/roles', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      return res.data;
+    },
+    update: async (id: number, payload: RoleRequest) => {
+      const res = await request<ApiResponse<RoleDto>>(`/api/v1/roles/${id}/update`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      return res.data;
+    },
+    delete: async (id: number) => {
+      const res = await request<ApiResponse<string>>(`/api/v1/roles/${id}/delete`, {
+        method: 'POST',
+      });
+      return res.message;
+    }
+  },
+  menus: {
+    getAll: async () => {
+      const res = await request<ApiResponse<MenuDto[]>>('/api/v1/menus');
+      return res.data;
+    }
+  },
+  roleMenus: {
+    assign: async (payload: RoleMenuRequest) => {
+      const res = await request<ApiResponse<RoleMenuResponse>>('/api/v1/role-menus/assign', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      return res.data;
+    },
+    getByRoleId: async (roleId: number) => {
+      const res = await request<ApiResponse<RoleMenuResponse[]>>(`/api/v1/role-menus/role/${roleId}`);
+      return res.data;
+    },
+    getMyPermissions: async () => {
+      const res = await request<ApiResponse<UserPermissionResponse[]>>('/api/v1/role-menus/my-permissions');
       return res.data;
     }
   }
 };
+
+export interface RoleDto {
+  id: number;
+  name: string;
+  description?: string;
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  status?: number;
+  deletedStatus?: number;
+}
+
+export interface RoleRequest {
+  name: string;
+  description?: string;
+}
+
+export interface MenuDto {
+  id: number;
+  name: string;
+  code: string;
+  path: string;
+}
+
+export interface RoleMenuResponse {
+  id: number;
+  roleId: number;
+  menuId: number;
+  canRead: number;
+  canWrite: number;
+  canDelete: number;
+}
+
+export interface RoleMenuRequest {
+  roleId: number;
+  menuId: number;
+  canRead: number;
+  canWrite: number;
+  canDelete: number;
+}
+
+export interface UserPermissionResponse {
+  menuId: number;
+  menuName: string;
+  menuCode: string;
+  menuPath: string;
+  canRead: number;
+  canWrite: number;
+  canDelete: number;
+}
+

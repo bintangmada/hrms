@@ -60,7 +60,7 @@ public class RoleController {
     // ENDPOINT: POST http://localhost:8020/api/v1/roles
     @Operation(summary = "Create a new role")
     @PostMapping
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<RoleResponse>> createRole(@Valid @RequestBody RoleRequest request) {
         RoleResponse response = roleService.createRole(request, getCurrentUsername());
         return new ResponseEntity<>(ApiResponse.success("Role created successfully", response), HttpStatus.CREATED);
@@ -69,7 +69,7 @@ public class RoleController {
     // ENDPOINT: POST http://localhost:8020/api/v1/roles/{id}/update
     @Operation(summary = "Update an existing role")
     @PostMapping("/{id}/update")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<RoleResponse>> updateRole(@PathVariable Long id, @Valid @RequestBody RoleRequest request) {
         RoleResponse response = roleService.updateRole(id, request, getCurrentUsername());
         return ResponseEntity.ok(ApiResponse.success("Role updated successfully", response));
@@ -78,7 +78,7 @@ public class RoleController {
     // ENDPOINT: POST http://localhost:8020/api/v1/roles/{id}/delete
     @Operation(summary = "Soft-delete an existing role")
     @PostMapping("/{id}/delete")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<String>> deleteRole(@PathVariable Long id) {
         String result = roleService.deleteRole(id, getCurrentUsername());
         return ResponseEntity.ok(ApiResponse.success(result));
