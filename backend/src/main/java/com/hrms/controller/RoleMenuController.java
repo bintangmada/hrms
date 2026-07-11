@@ -35,7 +35,7 @@ public class RoleMenuController {
 
     @Operation(summary = "Assign or update menu permissions for a role")
     @PostMapping("/assign")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<RoleMenuResponse>> assignPermission(@Valid @RequestBody RoleMenuRequest request) {
         RoleMenuResponse response = roleMenuService.assignPermission(request, getCurrentUsername());
         return new ResponseEntity<>(ApiResponse.success("Permission assigned successfully", response), HttpStatus.CREATED);

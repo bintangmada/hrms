@@ -47,7 +47,8 @@ services:
       - APP_BASE_URL=${APP_BASE_URL}
       
       # OPTIMASI MEMORI JVM (Sangat penting agar hemat RAM di VPS 4GB)
-      - JAVA_OPTS=-Xms64m -Xmx256m -XX:+UseSerialGC -XX:MaxMetaspaceSize=80m
+      - JAVA_OPTS=-Xms64m -Xmx256m -XX:+UseSerialGC -XX:MaxMetaspaceSize=160m
+
 
     # Pengaturan agar kontainer bisa mengenali host luar menggunakan nama domain 'host.docker.internal'
     extra_hosts:
