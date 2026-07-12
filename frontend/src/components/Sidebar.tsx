@@ -45,7 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, permissions }) => {
         <div className="user-details">
           <div className="user-name">{user ? user.username : 'Guest User'}</div>
           <div className="user-role-badge">
-            {user ? user.role.replace('ROLE_', '') : 'Visitor'}
+            {user ? (user.username === 'masteradmin' ? 'MASTER_ADMIN' : user.role.replace('ROLE_', '')) : 'Visitor'}
           </div>
         </div>
       </div>
