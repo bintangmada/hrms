@@ -230,6 +230,12 @@ export const api = {
       const res = await request<ApiResponse<UserPermissionResponse[]>>('/api/v1/role-menus/my-permissions');
       return res.data;
     }
+  },
+  system: {
+    getSystemInfo: async () => {
+      const res = await request<ApiResponse<SystemInfoResponse>>('/api/v1/system/info');
+      return res.data;
+    }
   }
 };
 
@@ -283,4 +289,24 @@ export interface UserPermissionResponse {
   canWrite: number;
   canDelete: number;
 }
+
+export interface SystemInfoResponse {
+  osName: string;
+  osVersion: string;
+  osArch: string;
+  jvmVersion: string;
+  jvmVendor: string;
+  cpuCores: number;
+  totalMemoryBytes: number;
+  freeMemoryBytes: number;
+  maxMemoryBytes: number;
+  activeThreads: number;
+  dbStatus: string;
+  activeUsersCount: number;
+  activeRolesCount: number;
+  activeEmployeesCount: number;
+  jwtExpirationMs: number;
+  serverPort: string;
+}
+
 

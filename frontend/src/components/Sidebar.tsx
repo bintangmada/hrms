@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, LogOut, Shield, Wallet, Clock } from 'lucide-react';
+import { LayoutDashboard, Users, LogOut, Shield, Wallet, Clock, Terminal } from 'lucide-react';
 import { removeToken, removeCurrentUser, getCurrentUser, UserPermissionResponse } from '../services/api';
 
 interface SidebarProps {
@@ -24,6 +24,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, permissions }) => {
   };
 
   const isAdmin = user && (user.role.includes('ROLE_ADMIN') || user.role.includes('ROLE_SUPER_ADMIN'));
+  const isSuperAdmin = user && user.role.includes('ROLE_SUPER_ADMIN');
 
   const hasMenuPermission = (menuCode: string) => {
     if (isAdmin) return true;
@@ -99,6 +100,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, permissions }) => {
           >
             <Shield size={20} />
             <span>Roles & Perms</span>
+          </NavLink>
+        )}
+
+        {isSuperAdmin && (
+          <NavLink 
+            to="/master-console" 
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            id="nav-link-master-console"
+          >
+            <Terminal size={20} />
+            <span>Master Console</span>
           </NavLink>
         )}
       </nav>
