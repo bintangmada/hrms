@@ -124,7 +124,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             log.info("Master Admin user not found. Seeding default Master Admin user...");
             User masterAdminUser = User.builder()
                     .username("masteradmin")
-                    .email("masteradmin@hrms.com")
+                    .email("bintangmadas@gmail.com")
                     .password(passwordEncoder.encode("masteradmin123"))
                     .role("ROLE_SUPER_ADMIN")
                     .emailVerified(1)

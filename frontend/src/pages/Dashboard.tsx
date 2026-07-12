@@ -37,7 +37,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ showToast }) => {
       }
     };
     fetchData();
-  }, [isAdmin, user, showToast]);
+  }, [isAdmin, user?.id, showToast]);
 
   const totalEmployees = employees.length;
   const linkedUsersCount = employees.filter(e => e.userId != null).length;
