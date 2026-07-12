@@ -29,6 +29,7 @@
   border-top: none !important;
   border-bottom: none !important;
   z-index: 100;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-brand {
@@ -39,6 +40,7 @@
 }
 
 .brand-logo {
+  flex-shrink: 0;
   background: var(--primary-gradient);
   color: white;
   width: 38px;
@@ -58,6 +60,9 @@
   font-weight: 700;
   font-size: 1.2rem;
   letter-spacing: -0.01em;
+  transition: opacity 0.2s ease, width 0.2s ease, margin 0.2s ease;
+  opacity: 1;
+  width: auto;
 }
 
 /* User Profile Section */
@@ -108,6 +113,8 @@
 
 .user-details {
   overflow: hidden;
+  transition: opacity 0.2s ease, width 0.2s ease, margin 0.2s ease;
+  opacity: 1;
 }
 
 .user-name {
@@ -181,6 +188,154 @@
   background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
   border-color: rgba(239, 68, 68, 0.3);
+}
+
+.nav-link span,
+.logout-btn span {
+  transition: opacity 0.2s ease, width 0.2s ease, visibility 0.2s ease;
+  opacity: 1;
+  visibility: visible;
+  white-space: nowrap;
+}
+
+/* Sidebar Toggle Button styling */
+.sidebar-toggle-btn {
+  position: absolute;
+  top: 36px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 110;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  padding: 0;
+}
+
+.sidebar-toggle-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.4);
+}
+
+/* Apply collapsed styling on desktop only */
+@media (min-width: 769px) {
+  .sidebar-container.collapsed {
+    width: 80px;
+    min-width: 80px;
+    padding: 30px 15px;
+  }
+
+  .sidebar-container.collapsed .brand-name {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    margin: 0;
+    visibility: hidden;
+  }
+
+  .sidebar-container.collapsed .sidebar-brand {
+    justify-content: center;
+    gap: 0;
+  }
+
+  .sidebar-container.collapsed .user-profile-section {
+    padding: 10px;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .sidebar-container.collapsed .user-details {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    margin: 0;
+    border: none;
+    padding: 0;
+    visibility: hidden;
+  }
+
+  .sidebar-container.collapsed .nav-link {
+    justify-content: center;
+    padding: 12px 0;
+    gap: 0;
+  }
+
+  .sidebar-container.collapsed .nav-link span {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+  }
+
+  .sidebar-container.collapsed .logout-btn {
+    justify-content: center;
+    padding: 12px 0;
+    gap: 0;
+  }
+
+  .sidebar-container.collapsed .logout-btn span {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+  }
+
+  /* CSS Hover Tooltips */
+  .sidebar-container.collapsed .nav-link,
+  .sidebar-container.collapsed .logout-btn,
+  .sidebar-container.collapsed .user-profile-section {
+    position: relative;
+  }
+
+  .sidebar-container.collapsed .nav-link::after,
+  .sidebar-container.collapsed .logout-btn::after,
+  .sidebar-container.collapsed .user-profile-section::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-8px);
+    background: #1f2937;
+    color: var(--text-main);
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+    z-index: 1000;
+  }
+
+  .sidebar-container.collapsed .nav-link:hover::after,
+  .sidebar-container.collapsed .logout-btn:hover::after,
+  .sidebar-container.collapsed .user-profile-section:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar-toggle-btn {
+    display: none !important;
+  }
 }
 
 /* Auth Page Containers */
