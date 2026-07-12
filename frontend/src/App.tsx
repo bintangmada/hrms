@@ -10,6 +10,7 @@ import { Employees } from './pages/Employees';
 import { Roles } from './pages/Roles';
 import { Attendance } from './pages/Attendance';
 import { Finance } from './pages/Finance';
+import { MasterConsole } from './pages/MasterConsole';
 import { getToken, getCurrentUser, api, UserPermissionResponse } from './services/api';
 import './App.css';
 
@@ -21,6 +22,7 @@ export const App: React.FC = () => {
   
   const user = getCurrentUser();
   const isAdmin = user && (user.role.includes('ROLE_ADMIN') || user.role.includes('ROLE_SUPER_ADMIN'));
+  const isSuperAdmin = user && user.role.includes('ROLE_SUPER_ADMIN');
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -116,6 +118,9 @@ export const App: React.FC = () => {
                         )}
                         {isAdmin && (
                           <Route path="/roles" element={<Roles showToast={showToast} />} />
+                        )}
+                        {isSuperAdmin && (
+                          <Route path="/master-console" element={<MasterConsole showToast={showToast} />} />
                         )}
                         <Route path="*" element={<Navigate to="/dashboard" replace />} />
                       </Routes>

@@ -80,27 +80,34 @@ public class DatabaseSeeder implements CommandLineRunner {
     }
 
     private void seedSuperAdmin() {
-        if (userRepository.count() == 0) {
-            log.info("No users found in database. Seeding default Super Admin user...");
+        // Ensure ROLE_SUPER_ADMIN exists
+        Role superAdminRole = roleRepository.findByNameAndDeletedStatus("ROLE_SUPER_ADMIN", 0)
+                .orElseGet(() -> {
+                    Role r = Role.builder()
+                            .name("ROLE_SUPER_ADMIN")
+                            .description("Super Administrator with unrestricted access")
+                            .build();
+                    r.setCreatedBy("SYSTEM_SEEDER");
+                    r.setStatus(1);
+                    r.setDeletedStatus(0);
+                    return roleRepository.save(r);
+                });
 
-            // 1. Create Super Admin User
+        // 1. Seed superadmin if not present
+        if (!userRepository.existsByUsername("superadmin")) {
+            log.info("Super Admin user not found. Seeding default Super Admin user...");
             User superAdminUser = User.builder()
                     .username("superadmin")
                     .email("superadmin@hrms.com")
-                    .password(passwordEncoder.encode("superadmin123")) // Default password
+                    .password(passwordEncoder.encode("superadmin123"))
                     .role("ROLE_SUPER_ADMIN")
-                    .emailVerified(1) // Super admin is pre-verified
+                    .emailVerified(1)
                     .build();
             superAdminUser.setCreatedBy("SYSTEM_SEEDER");
             superAdminUser.setStatus(1);
             superAdminUser.setDeletedStatus(0);
             User savedUser = userRepository.save(superAdminUser);
 
-            // 2. Find ROLE_SUPER_ADMIN Entity
-            Role superAdminRole = roleRepository.findByNameAndDeletedStatus("ROLE_SUPER_ADMIN", 0)
-                    .orElseThrow(() -> new IllegalStateException("ROLE_SUPER_ADMIN not found after role seeding!"));
-
-            // 3. Map user to role in junction table
             UserRole userRole = UserRole.builder()
                     .userId(savedUser.getId())
                     .roleId(superAdminRole.getId())
@@ -109,8 +116,33 @@ public class DatabaseSeeder implements CommandLineRunner {
             userRole.setStatus(1);
             userRole.setDeletedStatus(0);
             userRoleRepository.save(userRole);
+            log.info("Default Super Admin user (username: superadmin) seeded successfully!");
+        }
 
-            log.info("Default Super Admin user (username: superadmin, password: superadmin123) seeded successfully!");
+        // 2. Seed masteradmin if not present
+        if (!userRepository.existsByUsername("masteradmin")) {
+            log.info("Master Admin user not found. Seeding default Master Admin user...");
+            User masterAdminUser = User.builder()
+                    .username("masteradmin")
+                    .email("masteradmin@hrms.com")
+                    .password(passwordEncoder.encode("masteradmin123"))
+                    .role("ROLE_SUPER_ADMIN")
+                    .emailVerified(1)
+                    .build();
+            masterAdminUser.setCreatedBy("SYSTEM_SEEDER");
+            masterAdminUser.setStatus(1);
+            masterAdminUser.setDeletedStatus(0);
+            User savedUser = userRepository.save(masterAdminUser);
+
+            UserRole userRole = UserRole.builder()
+                    .userId(savedUser.getId())
+                    .roleId(superAdminRole.getId())
+                    .build();
+            userRole.setCreatedBy("SYSTEM_SEEDER");
+            userRole.setStatus(1);
+            userRole.setDeletedStatus(0);
+            userRoleRepository.save(userRole);
+            log.info("Default Master Admin user (username: masteradmin) seeded successfully!");
         }
     }
 
